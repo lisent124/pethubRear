@@ -26,10 +26,15 @@ SECRET_KEY = 'django-insecure-nc-%ax6fv9nr7bwb^t626!bku@k=3s63=rgh0_(@3tm!vlej7$
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "192.168.98.85",
     "192.168.31.12",
     "127.0.0.1"
 ]
 # Application definition
+BASEURL = "http://127.0.0.1:8000/"
+# BASEURL = "http://192.168.31.12:8000/"
+# BASEURL = "http://192.168.98.85:8000/"
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',

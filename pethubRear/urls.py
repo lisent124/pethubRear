@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('petHub/login', petHub.views.loginVerify),
     path('petHub/register', petHub.views.registerVerify),
-    path('test', petHub.views.test),
+    # path('test', petHub.views.test),
     path('petHub/parlour/commodities', petHub.views.commodityList),
     path('petHub/parlour/commoditiesByParlour', petHub.views.commodityList),
     path('petHub/order', petHub.views.getAndCreateTransactions),

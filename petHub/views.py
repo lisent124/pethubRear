@@ -6,14 +6,14 @@ import django
 from django.contrib.auth.hashers import make_password, check_password
 from django.core import serializers
 
-from pethubRear.settings import BASE_DIR
+from pethubRear.settings import BASEURL
 from petHub.models import User, Commodity, Parlour, Blog, Interactives, Accountant, Transactions
 from petHub.FinalCode import HTTP_CODE, Result
 
 
 # Create your views here.
 
-baseUrl = "http://127.0.0.1:8000/"
+baseUrl = BASEURL
 
 
 # baseUrl = "http://192.168.118.1:8000/"
@@ -33,11 +33,8 @@ def addCommodities():
 
 
 def test(request):
-    user_id = IdVerify(request)
-    if type(user_id) is Result:
-        return user_id
-    response = Result("HTTP_CODE")
-    return response
+    addCommodities()
+    return "response"
 
 
 def registerVerify(request):
@@ -98,9 +95,9 @@ def IdVerify(request):
     """
     try:
         id0 = request.get_signed_cookie("id")
-        # pet_id = request.headers.get("id")
-        # if id0 != pet_id:
-        #     raise UserWarning("身份验证失败")
+        pet_id = request.headers.get("id")
+        if id0 != pet_id:
+            raise UserWarning("身份验证失败")
     except KeyError as e:
         print("KeyError", e.args)
         return Result("找不到用户ID，请重新登录", code=HTTP_CODE.ID_MISSING)
@@ -110,7 +107,7 @@ def IdVerify(request):
     except django.core.signing.BadSignature as e:
         print(e.args)
         return Result("签证过期，请重新登录", code=HTTP_CODE.ID_VALIDATION_FAILED)
-    return id0
+    return pet_id
 
 
 def commoditiesToList(commodities):
@@ -220,11 +217,18 @@ def getAndCreateBlogs(request):
             blog.savePicture(image)
             # print(image.name, image)
         return Result("创建成功")
-
-    if request.GET.get("self") == "true":
-        blogs = Blog.objects.filter(user_id=user_id).order_by("-release_time")[:10]
-    else:
+    self = request.GET.get("self")
+    if self == "false":
         blogs = Blog.objects.filter(visible=True).order_by("?")[:5]
+    else:
+        if self is False: return Result("已经到底了", HTTP_CODE.NO_REQUEST_DATA)
+        i = (int(self)-1)*5
+        blogs = Blog.objects.filter(user_id=user_id).order_by("-release_time")
+        len = blogs.__len__()
+        if len >= i:
+            blogs = blogs[i:i+5]
+        else:
+            return Result("已经到底了",HTTP_CODE.NO_REQUEST_DATA)
     dataList = list()
     for i in blogs:
         blog = dict()
@@ -240,6 +244,7 @@ def getAndCreateBlogs(request):
             "like": (False if user_inter is None else user_inter.like),
             "comment": (False if user_inter is None else user_inter.comment),
         }
+        print((False if user_inter is None else user_inter.like))
         blog["blog"] = {
             "id": i.id,
             "content": i.content,
